@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>JPY Dönüştürücü: TL ve USD | Japon Yeni Hesaplama</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #151821;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #111827;
+      --soft: #f3f4f6;
+      --success: #0f766e;
+      --danger: #b91c1c;
+      --shadow: 0 20px 50px rgba(15, 23, 42, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(17, 24, 39, 0.10), transparent 32%),
+        linear-gradient(135deg, #f8fafc, #eef2ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 720px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .content {
+      padding: 24px 28px 28px;
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+    .input-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 750;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .field {
+      position: relative;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 20px;
+      padding: 16px 16px;
+      font-size: 18px;
+      font-weight: 700;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: #9ca3af;
+      box-shadow: 0 0 0 4px rgba(156, 163, 175, 0.18);
+    }
+
+    /* İndirim kartları (JPY cinsinden) */
+    .discount-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .mini-card {
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 14px;
+    }
+    .mini-title {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 7px;
+    }
+    .mini-value {
+      font-size: 18px;
+      font-weight: 850;
+      letter-spacing: -0.2px;
+      word-break: break-word;
+    }
+
+    /* İki sütunlu sonuç (TL + USD) - renkli sütun */
+    .result-two-columns {
+      background: linear-gradient(135deg, #111827, #374151);
+      border-radius: 28px;
+      padding: 20px 24px;
+      color: white;
+      box-shadow: 0 18px 35px rgba(17, 24, 39, 0.20);
+      margin-bottom: 24px;
+      margin-top: 8px;
+    }
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .col-title {
+      font-size: 12px;
+      font-weight: 800;
+      opacity: 0.7;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .main-amount {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      word-break: break-word;
+    }
+    /* Yan yana TL / USD için özel stil */
+    .main-amount span {
+      display: inline-block;
+    }
+    .slash-icon {
+      margin: 0 8px;
+      font-weight: 700;
+      opacity: 0.9;
+    }
+    .row-detail {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding-bottom: 8px;
+      margin-bottom: 6px;
+    }
+    .detail-label {
+      opacity: 0.75;
+      font-weight: 500;
+    }
+    .detail-value {
+      font-weight: 700;
+    }
+    /* Kurlar için özel stil (TL sütunu içinde) */
+    .rate-inside-row {
+      margin-top: 4px;
+      padding: 8px 0 4px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    .rate-inside-label {
+      font-size: 12px;
+      font-weight: 700;
+      opacity: 0.7;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .rate-inside-input {
+      width: 100%;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 16px;
+      padding: 10px 12px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: monospace;
+      color: white;
+      outline: none;
+      margin-bottom: 12px;
+      transition: all 0.2s;
+    }
+    .rate-inside-input:focus {
+      border-color: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.2);
+    }
+    .rate-inside-input::placeholder {
+      color: rgba(255,255,255,0.5);
+    }
+
+    .usd-value-block {
+      background: rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 12px;
+      margin-top: 4px;
+    }
+    .usd-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .usd-amount {
+      font-weight: 800;
+    }
+    hr {
+      border-color: rgba(255,255,255,0.2);
+      margin: 6px 0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      flex: 1;
+      border: 0;
+      border-radius: 18px;
+      padding: 13px 14px;
+      font-size: 14px;
+      font-weight: 850;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    button:active { transform: scale(0.98); }
+    .primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .secondary {
+      background: var(--soft);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .status {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .status.error { color: var(--danger); }
+    .status.ok { color: var(--success); }
+    .footer {
+      text-align: center;
+      padding: 0 28px 24px;
+      color: #9ca3af;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 620px) {
+      body { padding: 14px; }
+      .content { padding-left: 20px; padding-right: 20px; }
+      .columns { grid-template-columns: 1fr; gap: 24px; }
+      .main-amount { font-size: 28px; }
+      .discount-row { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#111827">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="JPY Dönüştürücü">
+</head>
+<body>
+<main class="app">
+  <section class="content">
+    <!-- JPY fiyat alanı: Etiket "JPY değeri giriniz" -->
+    <div class="input-group">
+      <label class="input-label" for="jpyPrice">JPY değeri giriniz</label>
+      <div class="field">
+        <input id="jpyPrice" type="number" inputmode="decimal" min="0" step="0.01" placeholder="" />
+      </div>
+    </div>
+
+    <!-- RENKLİ SÜTUN (TL ve USD sonuçları) - Kurlar TL sütunu içinde, genel toplam satırı kaldırıldı -->
+    <div class="result-two-columns">
+      <div class="columns">
+        <!-- Sol sütun: TL Karşılığı, yanında indirimli USD değeri (slash ile) -->
+        <div class="col">
+          <div class="col-title">TL KARŞILIĞI</div>
+          <div class="main-amount" id="tryResultMain">—</div>
+          <div class="row-detail">
+            <span class="detail-label">Ürün toplamı (indirimli)</span>
+            <span class="detail-value" id="baseResultDetail">—</span>
+          </div>
+          <div class="row-detail">
+            <span class="detail-label">İndirim TL karşılığı</span>
+            <span class="detail-value" id="discountTryInside">—</span>
+          </div>
+          <div class="row-detail">
+            <span class="detail-label">Ürün toplamı (indirimsiz)</span>
+            <span class="detail-value" id="undiscountedTotal">—</span>
+          </div>
+          <div class="row-detail">
+            <span class="detail-label">Telefon kayıt ücreti</span>
+            <span class="detail-value" id="phoneFeeDetail">Eklenmedi</span>
+          </div>
+          
+          <!-- Kurlar (JPY/TRY ve USD/JPY) TL sütunu altına eklendi -->
+          <div class="rate-inside-row">
+            <div class="rate-inside-label">JPY / TRY KURU (1 JPY = ? TL)</div>
+            <input type="number" id="rate" class="rate-inside-input" step="0.000001" placeholder="Kur yükleniyor" value="">
+          </div>
+          <div class="rate-inside-row" style="border-top: none; padding-top: 0;">
+            <div class="rate-inside-label">USD / JPY KURU (1 USD = ? JPY)</div>
+            <input type="number" id="usdJpyRate" class="rate-inside-input" step="0.01" placeholder="Örn: 150.50" value="">
+          </div>
+        </div>
+
+        <!-- Sağ sütun: Dolar karşılıkları + indirim USD satırı -->
+        <div class="col">
+          <div class="col-title">DOLAR KARŞILIKLARI</div>
+          <div class="usd-value-block">
+            <div class="usd-item">
+              <span>Orijinal JPY fiyatının USD değeri</span>
+              <span class="usd-amount" id="usdOriginalValue">—</span>
+            </div>
+            <div class="usd-item">
+              <span>%10 indirimli fiyatın USD değeri</span>
+              <span class="usd-amount" id="usdDiscountedValue">—</span>
+            </div>
+            <div class="usd-item">
+              <span>İndirim USD karşılığı</span>
+              <span class="usd-amount" id="discountUsdInside">—</span>
+            </div>
+            <hr>
+            <div class="usd-item" style="font-size:13px; opacity:0.8;">
+              <span>Hesaplama: JPY / USD/JPY kuru</span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- İndirim kartları (sadece JPY cinsinden) -->
+    <div class="discount-row">
+      <div class="mini-card">
+        <div class="mini-title">%10 indirim sonrası (JPY)</div>
+        <div class="mini-value" id="discountedJpy">—</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-title">Düşülen tutar (JPY)</div>
+        <div class="mini-value" id="discountAmount">—</div>
+      </div>
+    </div>
+
+    <!-- Butonlar ve durum -->
+    <div class="actions">
+      <button class="primary" id="refreshRate">Güncel kuru çek (TL + USD)</button>
+      <button class="secondary" id="phoneRegister">Telefon kayıt ücreti ekle</button>
+      <button class="secondary" id="clearAll">Temizle</button>
+    </div>
+
+    <div class="status" id="status">Canlı kurlar otomatik alınıyor. Her iki kutu da düzenlenebilir.</div>
+  </section>
+
+  <div class="footer">powered by GOKHAN KARATAS</div>
+</main>
+
+<script>
+  // DOM ELEMANLARI
+  const jpyPriceInput = document.getElementById('jpyPrice');
+  const rateInput = document.getElementById('rate');               // JPY/TRY kuru
+  const usdJpyRateInput = document.getElementById('usdJpyRate');   // USD/JPY kuru
+  
+  // JPY cinsinden indirim kartları
+  const discountedJpyEl = document.getElementById('discountedJpy');
+  const discountAmountEl = document.getElementById('discountAmount');
+  
+  // TL sütunu elemanları
+  const tryResultMain = document.getElementById('tryResultMain');   // artık TL / USD yanyana gösterilecek
+  const baseResultDetail = document.getElementById('baseResultDetail');
+  const discountTryInside = document.getElementById('discountTryInside');
+  const undiscountedTotalSpan = document.getElementById('undiscountedTotal');
+  const phoneFeeDetail = document.getElementById('phoneFeeDetail');
+  
+  // USD sütunu elemanları
+  const usdOriginalValueSpan = document.getElementById('usdOriginalValue');
+  const usdDiscountedValueSpan = document.getElementById('usdDiscountedValue');
+  const discountUsdInside = document.getElementById('discountUsdInside');
+  
+  const statusEl = document.getElementById('status');
+  const refreshRateBtn = document.getElementById('refreshRate');
+  const phoneRegisterBtn = document.getElementById('phoneRegister');
+  const clearAllBtn = document.getElementById('clearAll');
+
+  // Durum
+  let phoneFeeActive = false;
+  const PHONE_FEE_TRY = 54258;
+
+  // Format yardımcıları
+  function formatTRYNumber(value) {
+    if (isNaN(value) || value === null) return '—';
+    return value.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
+  }
+  function formatUSDNumber(value) {
+    if (isNaN(value) || value === null) return '—';
+    return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
+  }
+  function formatJPYNumber(value) {
+    if (isNaN(value)) return '— JPY';
+    return Math.round(value).toLocaleString('ja-JP') + ' JPY';
+  }
+
+  function getNumberFromInput(input) {
+    let val = String(input.value).replace(',', '.');
+    let num = Number(val);
+    return Number.isFinite(num) && !isNaN(num) ? num : 0;
+  }
+
+  // Ana hesaplama: TL ve USD değerleri, özellikle tryResultMain içinde TL toplamı ve indirimli USD yan yana
+  function calculateAll() {
+    const jpyPrice = getNumberFromInput(jpyPriceInput);
+    const tryRate = getNumberFromInput(rateInput);
+    const usdJpyRate = getNumberFromInput(usdJpyRateInput);
+    const hasValidJpy = jpyPrice > 0;
+    const hasValidTryRate = tryRate > 0;
+    const hasValidUsdRate = usdJpyRate > 0;
+
+    // 1. JPY indirim bilgileri (JPY cinsinden)
+    let discountJpy = 0;
+    let discountedJpyVal = 0;
+    if (hasValidJpy) {
+      discountJpy = jpyPrice * 0.10;
+      discountedJpyVal = jpyPrice * 0.90;
+      discountedJpyEl.textContent = formatJPYNumber(discountedJpyVal);
+      discountAmountEl.textContent = formatJPYNumber(discountJpy);
+    } else {
+      discountedJpyEl.textContent = '— JPY';
+      discountAmountEl.textContent = '— JPY';
+    }
+
+    // 2. TL hesaplamaları
+    let baseTry = 0;          // indirimli ürün TL
+    let finalTry = 0;         // indirimli ürün + telefon ücreti (büyük rakam)
+    let phoneFeeText = 'Eklenmedi';
+    let undiscountedTryTotal = 0;
+    let discountTryValue = 0;
+
+    if (hasValidJpy && hasValidTryRate) {
+      const discountedJpyAmount = jpyPrice * 0.90;
+      baseTry = discountedJpyAmount * tryRate;
+      finalTry = baseTry;
+      undiscountedTryTotal = jpyPrice * tryRate;
+      discountTryValue = discountJpy * tryRate;
+      
+      if (phoneFeeActive) {
+        finalTry += PHONE_FEE_TRY;
+        phoneFeeText = formatTRYNumber(PHONE_FEE_TRY);
+      } else {
+        phoneFeeText = 'Eklenmedi';
+      }
+      baseResultDetail.textContent = formatTRYNumber(baseTry);
+      discountTryInside.textContent = formatTRYNumber(discountTryValue);
+      undiscountedTotalSpan.textContent = formatTRYNumber(undiscountedTryTotal);
+      phoneFeeDetail.textContent = phoneFeeText;
+    } else {
+      finalTry = NaN;
+      baseResultDetail.textContent = '— TL';
+      discountTryInside.textContent = '— TL';
+      undiscountedTotalSpan.textContent = '— TL';
+      if (phoneFeeActive && hasValidJpy && !hasValidTryRate) {
+        phoneFeeDetail.textContent = 'Kur girilmeli';
+      } else if (phoneFeeActive && hasValidTryRate && !hasValidJpy) {
+        phoneFeeDetail.textContent = 'JPY fiyatı girin';
+      } else {
+        phoneFeeDetail.textContent = phoneFeeActive ? formatTRYNumber(PHONE_FEE_TRY) : 'Eklenmedi';
+      }
+      if (!hasValidTryRate && hasValidJpy) {
+        undiscountedTotalSpan.textContent = 'Kur tanımlı değil';
+        baseResultDetail.textContent = 'Kur girilmeli';
+        discountTryInside.textContent = 'Kur girilmeli';
+      }
+    }
+
+    // 3. USD hesaplamaları (orijinal, indirimli, indirim USD)
+    let discountedUsdValue = NaN;
+    if (hasValidJpy && hasValidUsdRate) {
+      const originalUsd = jpyPrice / usdJpyRate;
+      discountedUsdValue = (jpyPrice * 0.90) / usdJpyRate;
+      const discountUsdValueCalc = discountJpy / usdJpyRate;
+      usdOriginalValueSpan.textContent = formatUSDNumber(originalUsd);
+      usdDiscountedValueSpan.textContent = formatUSDNumber(discountedUsdValue);
+      discountUsdInside.textContent = formatUSDNumber(discountUsdValueCalc);
+    } else {
+      discountedUsdValue = NaN;
+      if (!hasValidJpy) {
+        usdOriginalValueSpan.textContent = '— USD';
+        usdDiscountedValueSpan.textContent = '— USD';
+        discountUsdInside.textContent = '— USD';
+      } else if (!hasValidUsdRate) {
+        usdOriginalValueSpan.textContent = 'USD/JPY kur gerekli';
+        usdDiscountedValueSpan.textContent = 'USD/JPY kur gerekli';
+        discountUsdInside.textContent = 'USD/JPY kur gerekli';
+      } else {
+        usdOriginalValueSpan.textContent = '— USD';
+        usdDiscountedValueSpan.textContent = '— USD';
+        discountUsdInside.textContent = '— USD';
+      }
+    }
+
+    // 4. Ana sonuç (tryResultMain): TL toplamı ve indirimli USD değerini yan yana göster
+    if (!isNaN(finalTry) && finalTry > 0 && !isNaN(discountedUsdValue) && discountedUsdValue > 0) {
+      // Her iki değer de geçerli
+      const tlFormatted = finalTry.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
+      const usdFormatted = discountedUsdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
+      tryResultMain.innerHTML = `${tlFormatted} <span class="slash-icon">/</span> ${usdFormatted}`;
+    } else if (!isNaN(finalTry) && finalTry > 0) {
+      // Sadece TL var, USD eksik
+      const tlFormatted = finalTry.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
+      tryResultMain.innerHTML = `${tlFormatted} <span class="slash-icon">/</span> — USD`;
+    } else if (!isNaN(discountedUsdValue) && discountedUsdValue > 0) {
+      // Sadece USD var (TL geçersiz)
+      const usdFormatted = discountedUsdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
+      tryResultMain.innerHTML = `— TL <span class="slash-icon">/</span> ${usdFormatted}`;
+    } else {
+      tryResultMain.innerHTML = '— TL / — USD';
+    }
+  }
+
+  // API üzerinden hem JPY/TRY hem USD/JPY kurlarını çek
+  async function fetchBothExchangeRates() {
+    refreshRateBtn.disabled = true;
+    refreshRateBtn.textContent = 'Kurlar alınıyor...';
+    statusEl.className = 'status';
+    statusEl.textContent = 'Güncel JPY/TRY ve USD/JPY kurları çekiliyor...';
+
+    const apis = [
+      async () => {
+        const res = await fetch('https://api.frankfurter.app/latest?from=JPY&to=TRY,USD');
+        if (!res.ok) throw new Error('Frankfurter hatası');
+        const data = await res.json();
+        const tryRate = data.rates?.TRY;
+        const usdPerJpy = data.rates?.USD;
+        if (!tryRate || !usdPerJpy || usdPerJpy <= 0) throw new Error('Frankfurter veri eksik');
+        const jpyPerUsd = 1 / usdPerJpy;
+        return { tryRate, jpyPerUsd };
+      },
+      async () => {
+        const res = await fetch('https://open.er-api.com/v6/latest/JPY');
+        if (!res.ok) throw new Error('ER-API hatası');
+        const data = await res.json();
+        const tryRate = data.rates?.TRY;
+        const usdPerJpy = data.rates?.USD;
+        if (!tryRate || !usdPerJpy || usdPerJpy <= 0) throw new Error('ER-API veri eksik');
+        const jpyPerUsd = 1 / usdPerJpy;
+        return { tryRate, jpyPerUsd };
+      }
+    ];
+
+    for (const api of apis) {
+      try {
+        const { tryRate, jpyPerUsd } = await api();
+        if (tryRate && jpyPerUsd && jpyPerUsd > 0 && tryRate > 0) {
+          rateInput.value = Number(tryRate).toFixed(6);
+          usdJpyRateInput.value = jpyPerUsd.toFixed(2);
+          const now = new Date();
+          statusEl.className = 'status ok';
+          statusEl.innerHTML = `Kurlar güncellendi: 1 JPY = ${tryRate.toFixed(5)} TL | 1 USD = ${jpyPerUsd.toFixed(2)} JPY. Son güncelleme: ${now.toLocaleString('tr-TR')}`;
+          calculateAll();
+          return;
+        }
+      } catch (err) {
+        console.warn('API denemesi başarısız:', err);
+      }
+    }
+
+    statusEl.className = 'status error';
+    statusEl.innerHTML = 'Canlı kurlar alınamadı. Bağlantıyı kontrol edin veya kurları elle girin.';
+    calculateAll();
+  }
+
+  // Telefon ücreti toggle
+  function initPhoneToggle() {
+    phoneRegisterBtn.addEventListener('click', () => {
+      phoneFeeActive = !phoneFeeActive;
+      if (phoneFeeActive) {
+        phoneRegisterBtn.textContent = 'Telefon kayıt ücreti eklendi (+54.258 TL)';
+        phoneRegisterBtn.classList.remove('secondary');
+        phoneRegisterBtn.classList.add('primary');
+      } else {
+        phoneRegisterBtn.textContent = 'Telefon kayıt ücreti ekle';
+        phoneRegisterBtn.classList.remove('primary');
+        phoneRegisterBtn.classList.add('secondary');
+      }
+      calculateAll();
+    });
+  }
+
+  // Temizle (sadece JPY fiyatını sıfırla)
+  function clearJpyOnly() {
+    jpyPriceInput.value = '';
+    calculateAll();
+    jpyPriceInput.focus();
+  }
+
+  // Event bağlantıları
+  jpyPriceInput.addEventListener('input', calculateAll);
+  rateInput.addEventListener('input', calculateAll);
+  usdJpyRateInput.addEventListener('input', calculateAll);
+
+  refreshRateBtn.addEventListener('click', async () => {
+    await fetchBothExchangeRates();
+    refreshRateBtn.disabled = false;
+    refreshRateBtn.textContent = 'Güncel kuru çek (TL + USD)';
+  });
+
+  clearAllBtn.addEventListener('click', clearJpyOnly);
+
+  // Sayfa yüklenirken
+  (async function init() {
+    initPhoneToggle();
+    calculateAll();
+    await fetchBothExchangeRates();
+    refreshRateBtn.disabled = false;
+    refreshRateBtn.textContent = 'Güncel kuru çek (TL + USD)';
+  })();
+
+  // Service Worker (PWA)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW kayıt hatası:', err));
+    });
+  }
+</script>
+</body>
+</html>
