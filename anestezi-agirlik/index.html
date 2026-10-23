@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#174ea6">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Anestezi Ağırlık">
@@ -46,6 +48,9 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;vertical-align:t
 <section class="card"><h2>Kaynaklar</h2><ol><li>Devine BJ. Gentamicin therapy. <i>Drug Intelligence & Clinical Pharmacy.</i> 1974;8:650–655.</li><li>Janmahasatian S, et al. Quantification of lean bodyweight. <i>Clinical Pharmacokinetics.</i> 2005;44(10):1051–1065. doi:10.2165/00003088-200544100-00004.</li><li>Erstad BL, Barletta JF. Drug dosing in the critically ill obese patient. <i>Critical Care.</i> 2020;24:315. doi:10.1186/s13054-020-03040-z.</li><li>ARDS Network. Ventilation with lower tidal volumes. <i>NEJM.</i> 2000;342:1301–1308. doi:10.1056/NEJM200005043421801.</li></ol><p class="muted">Eğitim ve klinik hesaplama desteği içindir; klinik değerlendirme ve kurum protokollerinin yerine geçmez.</p></section>
 <footer>Veriler tarayıcıda hesaplanır; bir sunucuya gönderilmez. iPhone'da Safari paylaşım menüsünden Ana Ekran'a Ekle seçeneğini kullanabilirsiniz.</footer>
 </main>
+<script>
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js").catch(() => {})); }
+</script>
 <script>
 (()=>{const $=id=>document.getElementById(id),fmt=n=>n.toLocaleString('tr-TR',{minimumFractionDigits:1,maximumFractionDigits:1});
 function calc(){const sex=$('sex').value,cm=Number($('height').value),tbw=Number($('weight').value);
